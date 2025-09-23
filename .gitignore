@@ -1,0 +1,51 @@
+# Ambiente Virtual do Python
+/backend/venv/
+.venv/
+
+# Scripts de ETL locais com dados sensíveis
+/backend/scripts/etl_avancado.py
+/backend/scripts/investigar_colunas.py
+/backend/scripts/testar_conexao_erp.py
+/backend/scripts/import_data_local.py
+
+# Arquivos de cache do Python
+__pycache__/
+*.pyc
+
+# Arquivos de configuração de IDE
+.idea/
+.vscode/
+
+# Dependências do Node.js
+/dashboard-mui/node_modules/
+/frontend/node_modules/
+/frontend_antigo/node_modules/
+
+# Arquivos de build do React
+/dashboard-mui/build/
+/frontend/build/
+/frontend_antigo/build/
+
+# Pastas de Backup
+/frontend_antigo/
+/frontend/
+# Arquivos de dados
+*.csv
+*.xlsx
+
+# Arquivos de segredos
+.env
+*.env
+.env.*
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+guia_git.txt
+
+# Arquivos de dados grandes ou temporários
+data/dados_consolidados.xlsx
+data/historico_produtos.xlsx
+/data/
