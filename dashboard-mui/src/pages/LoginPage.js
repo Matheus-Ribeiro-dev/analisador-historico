@@ -1,8 +1,13 @@
+
 // src/pages/LoginPage.js
+
 import React, { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Container, Box, TextField, Button, Typography, Alert } from '@mui/material';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { Container, Box, TextField, Button, Typography, Alert, Paper } from '@mui/material';
+
+// logo
+import Logo from './assets/logo-maridata.png';
 
 function LoginPage() {
   const [username, setUsername] = useState('');
@@ -11,24 +16,60 @@ function LoginPage() {
   const auth = useAuth();
   const navigate = useNavigate();
 
+    if (auth.isAuthenticated) {
+    return <Navigate to="/" />;
+    }
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
     const success = await auth.login(username, password);
     if (success) {
-      navigate('/'); // Redireciona para o dashboard após o login
+      navigate('/');
     } else {
       setError('Usuário ou senha inválidos.');
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <Box sx={{ marginTop: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5">
-          Login
+    <Container
+      component="main"
+      maxWidth={false}
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f5f5, #eaeafc)',
+      }}
+    >
+      <Paper
+        elevation={6}
+        sx={{
+          padding: 4,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          maxWidth: 400,
+          borderRadius: 3,
+        }}
+      >
+        <Box
+          component="img"
+          src={Logo}
+          alt="Logo MariData"
+          sx={{ width: 200, mb: 1 }}
+        />
+
+        <Typography variant="h6" sx={{ color: 'text.secondary', mb: 2 }}>
+          Service BI
         </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+
+        <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+          Conectar-se!
+        </Typography>
+
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1, width: '100%' }}>
           <TextField
             margin="normal"
             required
@@ -51,12 +92,29 @@ function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {error && <Alert severity="error" sx={{ width: '100%', mt: 2 }}>{error}</Alert>}
-          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>
+          {error && (
+            <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 4,
+              py: 1.2,
+              background: 'linear-gradient(135deg, #7b2ff7, #9f44d3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #6a24d3, #892bb8)',
+              },
+            }}
+          >
             Entrar
           </Button>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 }

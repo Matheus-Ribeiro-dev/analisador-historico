@@ -50,7 +50,13 @@ function ProductSearch({ onSearch }) {
         onKeyDown={handleKeyPress}
         inputRef={inputRef}
       />
-      <Button variant="contained" onClick={handleSearch} fullWidth>
+      <Button variant="contained" onClick={handleSearch} fullWidth     sx={{
+
+              background: 'linear-gradient(135deg, #7b2ff7, #9f44d3)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #6a24d3, #892bb8)',
+              },
+            }}>
         Buscar
       </Button>
     </Box>
