@@ -10,10 +10,11 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm  # Importamos o formulário de login
-from datetime import timedelta
+from typing import List, Dict, Any
 from .config import settings
+from datetime import timedelta, date
+from sqlalchemy import func, distinct
 
-# Importa tudo dos nossos outros arquivos .py
 from . import crud, models, schemas, auth
 from .db import SessionLocal, engine
 
@@ -105,3 +106,55 @@ def read_product(
     if db_product is None:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     return db_product
+
+
+
+# --- NOVO ENDPOINT PARA ANÁLISE DINÂMICA ---
+
+@app.post("/api/query", response_model=List[Dict[str, Any]])
+def run_analysis_query(
+    query_request: schemas.QueryRequest,
+    db: Session = Depends(get_db),
+    current_user: schemas.User = Depends(get_current_user)
+):
+    """
+    Recebe um pedido de análise dinâmica, executa a consulta no Data Mart
+    e retorna o resultado agregado.
+    """
+    # Chama nossa nova função do crud.py para fazer o trabalho pesado
+    results = crud.run_dynamic_query(db, query_request=query_request)
+    return results
+
+
+@app.get("/api/kpis/gerais")
+def get_geral_kpis(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
+    """
+    Busca KPIs de alto nível para a Home Page.
+    """
+    try:
+        hoje = date.today()
+        primeiro_dia_mes = hoje.replace(day=1)
+
+        # --- AQUI ESTÁ A MUDANÇA ---
+        # Em vez de contar tudo em dim_loja, contamos as lojas distintas que tiveram vendas no mês.
+        lojas_com_venda_no_mes = db.query(
+            func.count(distinct(models.FatoVendas.loja_id))
+        ).filter(
+            models.FatoVendas.data_venda >= primeiro_dia_mes,
+            models.FatoVendas.data_venda <= hoje
+        ).scalar() or 0
+
+        # O cálculo de vendas do mês atual continua o mesmo
+        vendas_mes_atual = db.query(func.sum(models.FatoVendas.venda_liquida)).filter(
+            models.FatoVendas.data_venda >= primeiro_dia_mes,
+            models.FatoVendas.data_venda <= hoje
+        ).scalar() or 0
+
+        return {
+            "total_lojas": lojas_com_venda_no_mes, # Agora o nome 'total_lojas' representa as lojas ativas no mês
+            "vendas_mes_atual": float(vendas_mes_atual),
+            "meta_exemplo": 11390000
+        }
+    except Exception as e:
+        print(f"Erro ao buscar KPIs: {e}")
+        raise HTTPException(status_code=500, detail="Erro interno ao buscar KPIs.")

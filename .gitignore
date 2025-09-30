@@ -7,6 +7,13 @@
 /backend/scripts/investigar_colunas.py
 /backend/scripts/testar_conexao_erp.py
 /backend/scripts/import_data_local.py
+/backend/scripts/pipeline_completo.py
+/backend/scripts/etl_fato_estoque.py
+/backend/scripts/etl_fato_vendas.py
+/backend/scripts/etl_dim_produto.py
+/backend/scripts/etl_dim_loja.py
+
+
 
 # Arquivos de cache do Python
 __pycache__/
