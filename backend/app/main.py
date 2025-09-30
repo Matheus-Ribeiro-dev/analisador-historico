@@ -128,30 +128,24 @@ def run_analysis_query(
 
 @app.get("/api/kpis/gerais")
 def get_geral_kpis(db: Session = Depends(get_db), current_user: schemas.User = Depends(get_current_user)):
-    """
-    Busca KPIs de alto nível para a Home Page.
-    """
     try:
         hoje = date.today()
         primeiro_dia_mes = hoje.replace(day=1)
 
-        # --- AQUI ESTÁ A MUDANÇA ---
-        # Em vez de contar tudo em dim_loja, contamos as lojas distintas que tiveram vendas no mês.
-        lojas_com_venda_no_mes = db.query(
-            func.count(distinct(models.FatoVendas.loja_id))
+        # A query agora é MUITO mais leve!
+        resultado = db.query(
+            func.sum(models.KpiResumoDiario.total_venda_liquida),
+            func.max(models.KpiResumoDiario.lojas_ativas) # Pega o pico de lojas ativas no mês
         ).filter(
-            models.FatoVendas.data_venda >= primeiro_dia_mes,
-            models.FatoVendas.data_venda <= hoje
-        ).scalar() or 0
+            models.KpiResumoDiario.data >= primeiro_dia_mes,
+            models.KpiResumoDiario.data <= hoje
+        ).first()
 
-        # O cálculo de vendas do mês atual continua o mesmo
-        vendas_mes_atual = db.query(func.sum(models.FatoVendas.venda_liquida)).filter(
-            models.FatoVendas.data_venda >= primeiro_dia_mes,
-            models.FatoVendas.data_venda <= hoje
-        ).scalar() or 0
+        vendas_mes_atual = resultado[0] or 0
+        lojas_ativas_no_mes = resultado[1] or 0
 
         return {
-            "total_lojas": lojas_com_venda_no_mes, # Agora o nome 'total_lojas' representa as lojas ativas no mês
+            "total_lojas": int(lojas_ativas_no_mes),
             "vendas_mes_atual": float(vendas_mes_atual),
             "meta_exemplo": 11390000
         }

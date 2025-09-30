@@ -81,3 +81,9 @@ class FatoEstoque(Base):
     closing_stock_quantity = Column(Integer)
     closing_stock_cost = Column(Numeric(12, 2))
     closing_stock_sale_price = Column(Numeric(12, 2))
+
+class KpiResumoDiario(Base):
+    __tablename__ = "kpi_resumo_diario"
+    data = Column(Date, primary_key=True)
+    total_venda_liquida = Column(Numeric)
+    lojas_ativas = Column(Integer)
